@@ -62,7 +62,27 @@ export function useAuth() {
 
   const signUp = useCallback(async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signUp({ email, password })
-    if (error) throw error
+    if (error) {
+      // Supabase returns "User already registered" when email exists in auth.users (with confirm email off).
+      // The account lives in Authentication → Users, not in public.profiles.
+      const msg = error.message ?? ''
+      if (
+        msg.toLowerCase().includes('already registered') ||
+        msg.toLowerCase().includes('already exists') ||
+        error.code === 'user_already_exists'
+      ) {
+        throw new Error(
+          'An account with this email already exists. Sign in instead, or use “Forgot password” if you don’t remember it.'
+        )
+      }
+      throw error
+    }
+    // When email confirmation is ON, Supabase may return success but with empty identities if user exists.
+    if (data?.user && (!data.user.identities || data.user.identities.length === 0)) {
+      throw new Error(
+        'An account with this email already exists. Sign in instead, or use “Forgot password” if you don’t remember it.'
+      )
+    }
     return data
   }, [])
 
