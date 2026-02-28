@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Seal — Encrypted Gmail Attachments",
+  "version": "1.0.0",
+  "description": "Encrypt Gmail attachments with Seal before sending. Files are encrypted locally in your browser.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage",
+    "identity"
+  ],
+  "host_permissions": [
+    "https://mail.google.com/*",
+    "https://*.supabase.co/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Seal"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["https://mail.google.com/*"]
+    }
+  ]
+}
